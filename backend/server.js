@@ -1,6 +1,6 @@
-require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/db");
+const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
@@ -8,14 +8,15 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+dotenv.config();
 connectDB();
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("API is Running.");
-});
+// app.get("/", (req, res) => {
+//   res.send("API is Running.");
+// });
 
 app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
@@ -24,19 +25,21 @@ app.use("/api/message", messageRoutes);
 // ----------------------------Deployment------------------------------
 
 const __dirname1 = path.resolve();
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname1, "frontend/build")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"));
-  });
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname1, "/frontend/build")));
+
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"))
+  );
 } else {
   app.get("/", (req, res) => {
-    res.send("API is Running.");
+    res.send("API is running..");
   });
 }
 
 // ----------------------------Deployment------------------------------
+const PORT = process.env.PORT;
 app.use(notFound);
 app.use(errorHandler);
 
@@ -52,7 +55,7 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("Connected to socket.io");
+  // console.log("Connected to socket.io");
   socket.on("setup", (userData) => {
     socket.join(userData._id);
     socket.emit("connected");
